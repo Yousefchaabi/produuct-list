@@ -1,34 +1,11 @@
-part of 'product_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-abstract class ProductEvent extends Equatable {
-  const ProductEvent();
+part 'product_event.freezed.dart';
 
-  @override
-  List<Object?> get props => [];
+/// Events avec Freezed
+@freezed
+class ProductEvent with _$ProductEvent {
+  const factory ProductEvent.loadProducts() = LoadProducts;
+  const factory ProductEvent.searchProducts(String query) = SearchProducts;
+  const factory ProductEvent.resetSearch() = ResetSearch;
 }
-
-/// Événement : Charger tous les produits
-/// Déclenché au démarrage de l'app ou lors d'un refresh
-class LoadProducts extends ProductEvent {
-  const LoadProducts();
-}
-
-/// Événement : Rechercher des produits
-/// Contient la requête de recherche (query)
-class SearchProducts extends ProductEvent {
-  final String query;
-
-  const SearchProducts(this.query);
-
-  @override
-  List<Object?> get props => [query];
-}
-
-
-/// Événement : Réinitialiser la recherche
-/// Retourne à la liste complète des produits
-class ResetSearch extends ProductEvent {
-  const ResetSearch();
-}
-
-

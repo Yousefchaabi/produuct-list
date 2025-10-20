@@ -1,85 +1,70 @@
-import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import '../../data/models/product_model.dart';
 import '../../data/repositories/product_repository.dart';
+import 'product_event.dart';
+import 'product_state.dart';
 
-part 'product_event.dart';
-part 'product_state.dart';
-
-/// Bloc principal qui gère toute la logique métier des produits
-/// Il écoute les Events et émet des States en conséquence
+/// Bloc avec Injectable
+@injectable
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
   final ProductRepository _repository;
 
-  // Cache local pour stocker tous les produits
+  // Cache local
   List<Product> _allProducts = [];
 
-  ProductBloc(this._repository) : super(const ProductInitial()) {
-    // Enregistrer les handlers pour chaque type d'événement
+  ProductBloc(this._repository) : super(const ProductState.initial()) {
     on<LoadProducts>(_onLoadProducts);
     on<SearchProducts>(_onSearchProducts);
-    //on<UpdateProduct>(_onUpdateProduct);
-    //on<DeleteProduct>(_onDeleteProduct);
     on<ResetSearch>(_onResetSearch);
   }
 
-  /// Handler : Charger tous les produits
+  /// Handler : Charger les produits
   Future<void> _onLoadProducts(
       LoadProducts event,
       Emitter<ProductState> emit,
       ) async {
-    // 1. Émettre un état de chargement
-    emit(const ProductLoading());
+    emit(const ProductState.loading());
 
     try {
-      // 2. Appeler le repository pour récupérer les données
       final products = await _repository.getProducts();
-
-      // 3. Sauvegarder dans le cache local
       _allProducts = products;
 
-      // 4. Émettre un état de succès avec les produits
-      emit(ProductLoaded(products: products));
+      emit(ProductState.loaded(products: products));
     } catch (e) {
-      // 5. En cas d'erreur, émettre un état d'erreur
-      emit(ProductError('Impossible de charger les produits: ${e.toString()}'));
+      emit(ProductState.error('Impossible de charger: $e'));
     }
   }
 
-  /// Handler : Rechercher des produits
+  /// Handler : Rechercher
   Future<void> _onSearchProducts(
       SearchProducts event,
       Emitter<ProductState> emit,
       ) async {
-    // Si la recherche est vide, réinitialiser
     if (event.query.isEmpty) {
-      emit(ProductLoaded(products: _allProducts, isSearching: false));
+      emit(ProductState.loaded(products: _allProducts));
       return;
     }
 
-    emit(const ProductLoading());
+    emit(const ProductState.loading());
 
     try {
-      // Rechercher dans le repository
       final filteredProducts = await _repository.searchProducts(event.query);
 
-      // Émettre les résultats filtrés avec le flag isSearching = true
-      emit(ProductLoaded(
+      emit(ProductState.loaded(
         products: filteredProducts,
         isSearching: true,
       ));
     } catch (e) {
-      emit(ProductError('Erreur de recherche: ${e.toString()}'));
+      emit(ProductState.error('Erreur de recherche: $e'));
     }
   }
 
-
-  /// Handler : Réinitialiser la recherche
+  /// Handler : Réinitialiser
   Future<void> _onResetSearch(
       ResetSearch event,
       Emitter<ProductState> emit,
       ) async {
-    // Simplement retourner à la liste complète
-    emit(ProductLoaded(products: _allProducts, isSearching: false));
+    emit(ProductState.loaded(products: _allProducts));
   }
 }

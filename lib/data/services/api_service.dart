@@ -1,89 +1,71 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 
-/// Service API utilisant Dio pour gérer toutes les requêtes HTTP
-
+/// Service API avec Dio et Injectable
+@lazySingleton // Singleton paresseux
 class ApiService {
-  // Instance unique de Dio configurée pour notre API
   final Dio _dio;
 
-  // URL de base de l'API FakeStore
   static const String baseUrl = 'https://fakestoreapi.com';
 
-  ApiService() : _dio = Dio(
+  ApiService()
+      : _dio = Dio(
     BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 5), // Timeout pour la connexion
-      receiveTimeout: const Duration(seconds: 3),    // Timeout pour recevoir les données
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 3),
       headers: {
-        'Content-Type' : 'application/json',
-        'Accept' : 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     ),
   ) {
-    // Intercepteur pour logger les requêtes et réponses (utile pour le debug)
+    // Intercepteur pour le logging
     _dio.interceptors.add(
       LogInterceptor(
         requestBody: true,
         responseBody: true,
         error: true,
-        requestHeader: true,
-        responseHeader: false,
+        logPrint: (obj) => print('🌐 API: $obj'),
       ),
     );
   }
 
-  /// Get : Récupérer tous les produits
+  /// GET : Récupérer tous les produits
   Future<Response> getProducts() async {
     try {
-      final response = await _dio.get('/products');
-      return response;
-    } on DioException catch(e) {
-      throw _handleError(e);
-    }
-  }
-
-  /// GET : Rechercher des produits (simulation avec filtrage local)
-  /// Note: FakeStore API ne supporte pas la recherche native
-  Future<Response> searchProducts(String query) async {
-    try {
-      // On récupère tous les produits puis on filtre côté client
-      final response = await _dio.get('/products');
-      return response;
+      return await _dio.get('/products');
     } on DioException catch (e) {
       throw _handleError(e);
     }
   }
 
-  /// Gestion centralisée des erreurs Dio
-  String _handleError(DioException error) {
-    String errorMessage = '';
+  /// GET : Rechercher des produits
+  Future<Response> searchProducts(String query) async {
+    try {
+      return await _dio.get('/products');
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
 
+  /// Gestion centralisée des erreurs
+  String _handleError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
-        errorMessage = 'Délai de connexion dépassé';
-        break;
+        return 'Délai de connexion dépassé';
       case DioExceptionType.sendTimeout:
-        errorMessage = "Délai d'envoi dépassé";
-        break;
+        return "Délai d'envoi dépassé";
       case DioExceptionType.receiveTimeout:
-        errorMessage = 'Délai de réception dépassé';
-        break;
+        return 'Délai de réception dépassé';
       case DioExceptionType.badResponse:
-        errorMessage = 'Erreur serveur: ${error.response?.statusCode}';
-        break;
+        return 'Erreur serveur: ${error.response?.statusCode}';
       case DioExceptionType.cancel:
-        errorMessage = 'Requête annulée';
-        break;
+        return 'Requête annulée';
       case DioExceptionType.connectionError:
-        errorMessage = 'Pas de connexion internet';
-        break;
+        return 'Pas de connexion internet';
       default:
-        errorMessage = 'Erreur inconnue';
+        return 'Erreur inconnue: ${error.message}';
     }
-
-    return errorMessage;
   }
-  /// Getter pour accéder à l'instance Dio si nécessaire
-  Dio get dio => _dio;
 }
-

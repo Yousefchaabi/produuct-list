@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../data/models/product_model.dart';
 
-/// Widget réutilisable pour afficher un produit
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onEdit;
@@ -24,16 +24,13 @@ class ProductCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // Afficher les détails du produit
-          _showProductDetails(context);
-        },
+        onTap: () => _showProductDetails(context),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image du produit
+              // Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
@@ -53,12 +50,11 @@ class ProductCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
 
-              // Informations du produit
+              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Titre
                     Text(
                       product.title,
                       style: const TextStyle(
@@ -69,8 +65,6 @@ class ProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-
-                    // Catégorie
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -90,8 +84,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-
-                    // Prix
                     Text(
                       '${product.price.toStringAsFixed(2)} €',
                       style: const TextStyle(
@@ -101,8 +93,6 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-
-                    // Rating
                     Row(
                       children: [
                         const Icon(
@@ -124,17 +114,15 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
 
-              // Boutons d'action
+              // Actions
               Column(
                 children: [
-                  // Bouton Modifier
                   IconButton(
                     icon: const Icon(Icons.edit, size: 20),
                     color: Colors.blue,
                     onPressed: onEdit,
                     tooltip: 'Modifier',
                   ),
-                  // Bouton Supprimer
                   IconButton(
                     icon: const Icon(Icons.delete, size: 20),
                     color: Colors.red,
@@ -150,7 +138,6 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  /// Afficher un dialogue avec tous les détails
   void _showProductDetails(BuildContext context) {
     showDialog(
       context: context,
@@ -161,7 +148,6 @@ class ProductCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Image en grand
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
@@ -172,8 +158,6 @@ class ProductCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Description
               const Text(
                 'Description:',
                 style: TextStyle(
@@ -184,8 +168,6 @@ class ProductCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(product.description),
               const SizedBox(height: 16),
-
-              // Informations supplémentaires
               _buildInfoRow('Prix', '${product.price} €'),
               _buildInfoRow('Catégorie', product.category),
               _buildInfoRow('Note', '${product.rating.rate}/5'),
@@ -212,9 +194,7 @@ class ProductCard extends StatelessWidget {
             '$label: ',
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          Expanded(
-            child: Text(value),
-          ),
+          Expanded(child: Text(value)),
         ],
       ),
     );
